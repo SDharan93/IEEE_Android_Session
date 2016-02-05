@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.Toolbar;
@@ -24,6 +27,7 @@ import com.loopj.android.http.RequestParams;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.jar.Manifest;
 
 import org.json.*;
 
@@ -47,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
 
     private AlertDialog mAddListeningDialog;
     private AlertDialog mRetrieveListeningDialog;
+
+    private static final int REQUEST_AUDIO_RECORD_RESULT = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,12 +93,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        setup();
+        //setup();
+        callVoice();
     }
 
 
     private void setup(){
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        /*SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         mPatientId = sharedPref.getString(getString(R.string.patient_id), "");
 
         JSONObject obj = new JSONObject();
@@ -125,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
-
+        */
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Speak the memory you want to SAVE")
                 .setTitle("Listening...");
@@ -135,6 +142,45 @@ public class MainActivity extends AppCompatActivity {
         builder.setMessage("Speak the memory you want to RETRIEVE")
                 .setTitle("Listening...");
         mRetrieveListeningDialog = builder.create();
+    }
+
+    private void callVoice() {
+        if(ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            setup();
+        }
+
+        else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if(shouldShowRequestPermissionRationale(android.Manifest.permission.RECORD_AUDIO)) {
+                    Toast.makeText(this,
+                            "Audio Recorder permission required to retrieve and store video.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[] {android.Manifest.permission.RECORD_AUDIO},
+                        REQUEST_AUDIO_RECORD_RESULT);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if(requestCode == REQUEST_AUDIO_RECORD_RESULT) {
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                setup();
+            }
+
+            else {
+                Toast.makeText(this,
+                        "Audio Recording permission has not been granted, cannot understand voice.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+        else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 
     @Override
@@ -175,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onBeginningOfSpeech()
         {
-            //Log.d(TAG, "onBeginingOfSpeech");
+            Log.d(TAG, "onBeginingOfSpeech");
         }
 
         @Override
@@ -187,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onEndOfSpeech()
         {
-            //Log.d(TAG, "onEndOfSpeech");
+            Log.d(TAG, "onEndOfSpeech");
         }
 
         @Override
@@ -195,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
         {
             mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
 
-            //Log.d(TAG, "error = " + error);
+            Log.d(TAG, "error = " + error);
         }
 
         @Override
@@ -219,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onResults(Bundle results)
         {
-            //Log.d(TAG, "onResults"); //$NON-NLS-1$
+            Log.d(TAG, "onResults"); //$NON-NLS-1$
             ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
             int i = 0;
             // matches are the return values of speech recognition engine
@@ -265,8 +311,8 @@ public class MainActivity extends AppCompatActivity {
                         String[] split = spoken.split(" ");
                         ArrayList<String> goodWords = new ArrayList<>();
 
-                        for(String word : split){
-                            if(!ignoreWords.contains(word)){
+                        for (String word : split) {
+                            if (!ignoreWords.contains(word)) {
                                 goodWords.add(word);
                             }
                         }
@@ -275,10 +321,10 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             obj.put("keywords", new JSONArray(goodWords));
                             obj.put("message", spoken);
-                        }catch (JSONException e){
+                        } catch (JSONException e) {
                             Log.e(TAG, "Error adding memory", e);
                         }
-
+                        /*
                         MemoryBoxRestClient.post(MainActivity.this, "api/memory/" + mPatientId, obj, new JsonHttpResponseHandler() {
                             @Override
                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -291,6 +337,7 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                         });
+                        */
                         dialog.dismiss();
 
                     }
@@ -315,6 +362,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        /*
         MemoryBoxRestClient.get("api/memory/" + mPatientId, params, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -374,7 +422,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                 Log.e(TAG, "Could not retrieve memory: " + errorResponse);
             }
-        });
+        }); */
     }
 
     List<String> ignoreWords = Arrays.asList(new String[]{"a", "i", "it", "am", "at", "on", "in", "to", "too", "very",
