@@ -9,11 +9,12 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class DatabaseHelper extends SQLiteOpenHelper{
 
-    String DATABASE_NAME = "MemoryBox";
-    String TABLE_NAME = ""
+    static String DATABASE_NAME = "MemoryBox";
+    static String TABLE_NAME = "Memory";
+    static int DATABASE_VERSION = 1;
 
     public DatabaseHelper(Context context) {
-        super(context, "", null, 1);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
