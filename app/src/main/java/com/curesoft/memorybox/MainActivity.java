@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_AUDIO_RECORD_RESULT = 1;
     private DatabaseHelper dbHandler;
-    private SQLiteDatabase dataBase = dbHandler.getWritableDatabase();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,6 +135,10 @@ public class MainActivity extends AppCompatActivity {
             });
         }
         */
+
+        //Database portion of the application
+        dbHandler = new DatabaseHelper(this);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Speak the memory you want to SAVE")
                 .setTitle("Listening...");
@@ -314,40 +317,24 @@ public class MainActivity extends AppCompatActivity {
                         String[] split = spoken.split(" ");
                         ArrayList<String> goodWords = new ArrayList<>();
 
+                        //Adds key words to array while ignoring the common words.
                         for (String word : split) {
                             if (!ignoreWords.contains(word)) {
                                 goodWords.add(word);
                             }
                         }
 
-                        JSONObject obj = new JSONObject();
-                        try {
-                            obj.put("keywords", new JSONArray(goodWords));
-                            obj.put("message", spoken);
-                        } catch (JSONException e) {
-                            Log.e(TAG, "Error adding memory", e);
+                        if (dbHandler.insertData(spoken, goodWords)) {
+                            Toast.makeText(MainActivity.this, "Added memory!", Toast.LENGTH_LONG).show();
+                        } else {
+                            Log.e(TAG, "Could not add memory");
                         }
-                        /*
-                        MemoryBoxRestClient.post(MainActivity.this, "api/memory/" + mPatientId, obj, new JsonHttpResponseHandler() {
-                            @Override
-                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                                Toast.makeText(MainActivity.this, "Added memory!", Toast.LENGTH_LONG).show();
-                            }
-
-                            @Override
-                            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                                Log.e(TAG, "Could not add memory: " + errorResponse);
-
-                            }
-                        });
-                        */
                         dialog.dismiss();
-
                     }
                 })
-            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
                 }
             });

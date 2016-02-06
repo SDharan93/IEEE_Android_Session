@@ -1,10 +1,13 @@
 package com.curesoft.memorybox;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import java.util.ArrayList;
 
 /**
  * Created by shane on 05/02/16.
@@ -36,13 +39,27 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         try {
             db.execSQL(createMemoryTable);
             db.execSQL(createKeyTable);
+            Log.v(TAG, "Created the table or table exists.");
         } catch(SQLException e) {
-            Log.d(TAG, "Error with creating tables");
+            Log.d(TAG, "Error with creating tables.");
         }
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+    }
+
+    public boolean insertData (String phrase, ArrayList<String> keywords) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues content = new ContentValues();
+        content.put(Memory, phrase);
+        long id = db.insert(MEMORY_TABLE_NAME, null, content);
+
+        if(id == -1) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }
