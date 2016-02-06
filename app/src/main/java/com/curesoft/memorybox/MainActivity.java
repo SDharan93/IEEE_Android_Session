@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
@@ -324,20 +325,22 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
 
-                        if (dbHandler.insertData(spoken, goodWords)) {
+                        try {
+                            dbHandler.insertData(spoken, goodWords);
                             Toast.makeText(MainActivity.this, "Added memory!", Toast.LENGTH_LONG).show();
-                        } else {
+                        } catch (SQLException e) {
                             Log.e(TAG, "Could not add memory");
                         }
                         dialog.dismiss();
+
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
+                        dialog.dismiss();
+                    }
+                });
         AlertDialog results = builder.create();
         results.show();
     }
