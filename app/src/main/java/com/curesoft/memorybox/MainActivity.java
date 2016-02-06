@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
@@ -53,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
     private AlertDialog mRetrieveListeningDialog;
 
     private static final int REQUEST_AUDIO_RECORD_RESULT = 1;
+    private DatabaseHelper dbHandler;
+    private SQLiteDatabase dataBase = dbHandler.getWritableDatabase();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
