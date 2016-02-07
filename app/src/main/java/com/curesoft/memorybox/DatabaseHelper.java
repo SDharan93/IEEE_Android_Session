@@ -8,7 +8,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by shane on 05/02/16.
@@ -16,7 +19,7 @@ import java.util.ArrayList;
 public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static final String DATABASE_NAME = "MEMORY_BOX";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String UID = "_ID";
 
     private static final String MEMORY_TABLE_NAME = "MEMORY_TB";
@@ -27,6 +30,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     private static final String KEY = "KEY";
 
     private static final String FASTTABLE = "DICTONARY_TB";
+    private static final String DATETIME = "DATETIME";
 
     private static final String TAG = "DB";
 
@@ -41,62 +45,57 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         //String createKeyTable = "CREATE TABLE IF NOT EXISTS " + KEY_TABLE_NAME + " ("+UID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+MEMORY_ID+" INTEGER, "+KEY+" VARCHAR(50));";
 
         //create a fast table search ...
-        String createFTS3 = "CREATE VIRTUAL TABLE "+FASTTABLE+" USING fts4()";
+        String createFTS3 = "CREATE VIRTUAL TABLE "+FASTTABLE+" USING fts4("+MEMORY+", "+DATETIME+ ");";
 
         try {
-            //db.execSQL(createMemoryTable);
-            //db.execSQL(createKeyTable);
             db.execSQL(createFTS3);
-            Log.v(TAG, "Created the table or table exists.");
         } catch(SQLException e) {
-            Log.d(TAG, "Error with creating tables.");
+            Log.e(TAG, "Error with creating tables.");
         }
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL("DROP TABLE IF EXISTS "+FASTTABLE);
+        onCreate(db);
     }
 
     public void insertData (String phrase, ArrayList<String> keywords) {
         SQLiteDatabase db = this.getWritableDatabase();
-        //ContentValues content = new ContentValues();
-        //content.put(MEMORY, phrase);
-        db.execSQL("INSERT INTO " + FASTTABLE + " VALUES('" + phrase + "');");
-        //long id = db.insert(MEMORY_TABLE_NAME, null, content);
 
-        /*
+        //get the current time
+        Calendar c = Calendar.getInstance();
+        System.out.println("Current time => "+c.getTime());
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = df.format(c.getTime());
+
+        ContentValues content = new ContentValues();
+        content.put(MEMORY, phrase);
+        content.put(DATETIME, formattedDate);
+
+        long id = db.insert(FASTTABLE, null, content);
         if(id == -1) {
-            return false;
-        } else {
+            Log.e(TAG, "Failed to insert");
+        }
+    }
 
-            for(String word : keywords) {
-                ContentValues temp = new ContentValues();
-                temp.put(KEY, word);
-                temp.put(MEMORY_ID, id);
-                db.insert(KEY_TABLE_NAME,null,temp);
+    public Cursor getData(String[] keywords) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        //String used for search query with all the keywords.
+        String search = "";
+        int counter = 0;
+        for(String word: keywords) {
+
+            //do not add space to the first word.
+            if(counter == 0) {
+                search += word;
+            } else {
+                search += " OR "+word;
             }
+        }
 
-            return true;
-        }*/
-    }
-
-    /*
-    public Cursor getData() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        //Cursor res //= db.rawQuery("SELECT DISTINCT "+MEMORY+ " FROM "+KEY_TABLE_NAME+ " LEFT JOIN "+MEMORY_TABLE_NAME+ "USING("+MEMORY_ID+") WHERE WORD IN", null);
+        String query = "SELECT * FROM "+FASTTABLE+" WHERE "+MEMORY+" MATCH '"+search+"' ORDER BY "+DATETIME+" DESC;";
+        Cursor res = db.rawQuery(query, null);
         return res;
-    }
-*/
-    public void dropTables () {
-        SQLiteDatabase db = this.getWritableDatabase();
-        try {
-            db.execSQL("DROP TABLE IF EXISTS " + MEMORY_TABLE_NAME);
-            db.execSQL("DROP TABLE IF EXISTS" + KEY_TABLE_NAME);
-        }
-
-        catch(SQLException e) {
-            Log.d(TAG, "Error with dropping tables.");
-        }
     }
 }

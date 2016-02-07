@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
@@ -102,40 +103,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void setup(){
-        /*SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        mPatientId = sharedPref.getString(getString(R.string.patient_id), "");
-
-        JSONObject obj = new JSONObject();
-        try {
-            obj.put("name", "somename");
-            obj.put("email", "someemail");
-        }catch(JSONException e){
-
-        }
-
-        if(mPatientId.equals("")){
-            MemoryBoxRestClient.post(this, "api/patient/", obj, new JsonHttpResponseHandler() {
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    try {
-                        mPatientId = response.getString("patientId");
-                    }catch (JSONException e){
-                        Log.e(TAG, "Couldn't call patient api");
-                    }
-
-                    SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                    editor.putString(getString(R.string.patient_id), mPatientId);
-                    editor.commit();
-                }
-
-                @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                    Log.e(TAG, "Could not create patient: " + errorResponse);
-                }
-            });
-        }
-        */
 
         //Database portion of the application
         dbHandler = new DatabaseHelper(this);
@@ -228,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onBeginningOfSpeech()
         {
-            Log.d(TAG, "onBeginingOfSpeech");
+            //Log.d(TAG, "onBeginingOfSpeech");
         }
 
         @Override
@@ -240,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onEndOfSpeech()
         {
-            Log.d(TAG, "onEndOfSpeech");
+            //Log.d(TAG, "onEndOfSpeech");
         }
 
         @Override
@@ -248,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
         {
             mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
 
-            Log.d(TAG, "error = " + error);
+            //Log.d(TAG, "error = " + error);
         }
 
         @Override
@@ -266,13 +233,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReadyForSpeech(Bundle params)
         {
-            Log.d(TAG, "onReadyForSpeech"); //$NON-NLS-1$
+            //Log.d(TAG, "onReadyForSpeech"); //$NON-NLS-1$
         }
 
         @Override
         public void onResults(Bundle results)
         {
-            Log.d(TAG, "onResults"); //$NON-NLS-1$
+            //Log.d(TAG, "onResults"); //$NON-NLS-1$
             ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
             int i = 0;
             // matches are the return values of speech recognition engine
@@ -347,75 +314,45 @@ public class MainActivity extends AppCompatActivity {
 
     public void retrieveMemory(final String spoken){
         String[] split = spoken.split(" ");
-        RequestParams params = new RequestParams();
+        Toast.makeText(MainActivity.this, "Retrieved memory!", Toast.LENGTH_LONG).show();
 
-        for(String word : split){
-            if(!ignoreWords.contains(word)){
-                params.put("searchkeys", word);
-            }
-        }
-
-        /*
-        MemoryBoxRestClient.get("api/memory/" + mPatientId, params, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                Toast.makeText(MainActivity.this, "Retrieved memory!", Toast.LENGTH_LONG).show();
-
-                if(response.has("memories")){
-                    JSONArray jArray =  null;
-                    try{
-                        jArray = response.getJSONArray("memories");
-                    } catch (JSONException e){
-                        Log.e(TAG, "Memories response is empty: ", e);
-                        return;
-                    }
-                    String memory = "";
-                    if (jArray != null) {
-                        for (int i=0;i<jArray.length();i++){
-                            try {
-                                memory += (i+1) + ". " + jArray.get(i).toString() + "\n";
-                            } catch (JSONException e) {
-                                Log.e(TAG, "couldn't parse memories: ", e);
-                                return;
-                            }
+        Cursor cur = dbHandler.getData(split);
+        String searchResults = "";
+        //no match was found.
+        if(cur.getCount() == 0) {
+            //Log.d(TAG, "Did not get a hit on search.");
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setMessage("For phrase: " + spoken)
+                    .setTitle("No memory found")
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
                         }
-                    }
-
-                    if(!memory.equals("")) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                        builder.setMessage(memory)
-                                .setTitle("We found your memory")
-                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                        AlertDialog results = builder.create();
-                        results.show();
-                    }else{
-
-                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                        builder.setMessage("For phrase: " + spoken)
-                                .setTitle("No memory found")
-                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                        AlertDialog results = builder.create();
-                        results.show();
-                    }
-
-                }
+                    });
+            AlertDialog results = builder.create();
+            results.show();
+        } else {
+            //Log.d(TAG, "got a hit on search, will start to parse.");
+            //organize the string for user to read.
+            int counter = 1;
+            while(cur.moveToNext()) {
+                searchResults += (counter) + ". " + cur.getString(0) + "\n";
+                counter++;
             }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                Log.e(TAG, "Could not retrieve memory: " + errorResponse);
-            }
-        }); */
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setMessage(searchResults)
+                    .setTitle("We found your memory")
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            AlertDialog results = builder.create();
+            results.show();
+        }
     }
 
     List<String> ignoreWords = Arrays.asList(new String[]{"a", "i", "it", "am", "at", "on", "in", "to", "too", "very",
