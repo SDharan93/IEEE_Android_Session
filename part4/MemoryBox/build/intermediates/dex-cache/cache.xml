@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="/Users/natunini/.gradle/caches/modules-2/files-2.1/com.loopj.android/android-async-http/1.4.9/386a4339ffe52d5d63e80f9bed8d2b1d1a418249/android-async-http-1.4.9.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="386a4339ffe52d5d63e80f9bed8d2b1d1a418249">
+        <dex dex="/Repository/github/IEEE_Android_Session/part4/app/build/intermediates/pre-dexed/debug/android-async-http-1.4.9-be9c77c1d3f21e3db64b2dc3885c267bbf53faae.jar" />
+    </item>
+    <item
+        jar="/Repository/github/IEEE_Android_Session/part4/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.1/jars/classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="d86429b0f0b3f3cafbeb78dda1b9d89119ccb05d">
+        <dex dex="/Repository/github/IEEE_Android_Session/part4/app/build/intermediates/pre-dexed/debug/classes-998cdd0be0d2fb137a447c04086cffea4952339e.jar" />
+    </item>
+    <item
+        jar="/Users/natunini/.gradle/caches/modules-2/files-2.1/cz.msebera.android/httpclient/4.3.6/526a9f794eab830eae4f23a62c572878b3f491ab/httpclient-4.3.6.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="526a9f794eab830eae4f23a62c572878b3f491ab">
+        <dex dex="/Repository/github/IEEE_Android_Session/part4/app/build/intermediates/pre-dexed/debug/httpclient-4.3.6-7265ff03214b9c96c56eb60a5cc4e8b4fc1c61e5.jar" />
+    </item>
+    <item
+        jar="/Repository/github/IEEE_Android_Session/part4/app/build/intermediates/exploded-aar/com.android.support/cardview-v7/23.0.1/jars/classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="39ae02ce40c3ac828abbf780ce0ff5d7a28b7d6a">
+        <dex dex="/Repository/github/IEEE_Android_Session/part4/app/build/intermediates/pre-dexed/debug/classes-f7fa1c267fcc876232cbf92a0344b3a869446b26.jar" />
+    </item>
+    <item
+        jar="/Repository/github/IEEE_Android_Session/part4/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.1/jars/libs/internal_impl-23.0.1.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="aa92916125166649d8ad4ba3940c3dd7515596d3">
+        <dex dex="/Repository/github/IEEE_Android_Session/part4/app/build/intermediates/pre-dexed/debug/internal_impl-23.0.1-f7e39f0d46ccf7c86e83b9163e28ebff45577c82.jar" />
+    </item>
+    <item
+        jar="/Repository/github/IEEE_Android_Session/part4/app/build/intermediates/exploded-aar/com.android.support/design/23.0.1/jars/classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="e5c61a3169221a89654ffcaaed47bba51cf071ad">
+        <dex dex="/Repository/github/IEEE_Android_Session/part4/app/build/intermediates/pre-dexed/debug/classes-7d3c4271198b634ce29d480240d7d3ea9eda5de0.jar" />
+    </item>
+    <item
+        jar="/Repository/github/IEEE_Android_Session/part4/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.1/jars/classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="c31e21b53ff2f74664e498248d01453a32e32d48">
+        <dex dex="/Repository/github/IEEE_Android_Session/part4/app/build/intermediates/pre-dexed/debug/classes-388cb0585ae58cee6bdaf3ecfb99ed0a2b44dfa9.jar" />
+    </item>
+    <item
+        jar="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/23.0.1/support-annotations-23.0.1.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="1fce89a6428c51467090d7f424e4c9c3dbd55f7e">
+        <dex dex="/Repository/github/IEEE_Android_Session/part4/app/build/intermediates/pre-dexed/debug/support-annotations-23.0.1-e4361d4e6f085360fb659dfb3e8f819d6ae5b30b.jar" />
+    </item>
+
+</items>
