@@ -13,9 +13,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-/**
- * Created by shane on 05/02/16.
- */
 public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static final String DATABASE_NAME = "MEMORY_BOX";
@@ -41,10 +38,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        //String createMemoryTable = "CREATE TABLE IF NOT EXISTS " + MEMORY_TABLE_NAME + " ("+UID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+MEMORY+" VARCHAR(255));";
-        //String createKeyTable = "CREATE TABLE IF NOT EXISTS " + KEY_TABLE_NAME + " ("+UID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+MEMORY_ID+" INTEGER, "+KEY+" VARCHAR(50));";
-
-        //create a fast table search ...
+        //create a fast text search ...
         String createFTS3 = "CREATE VIRTUAL TABLE "+FASTTABLE+" USING fts4("+MEMORY+", "+DATETIME+ ");";
 
         try {
