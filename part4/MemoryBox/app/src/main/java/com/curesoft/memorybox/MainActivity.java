@@ -112,24 +112,23 @@ public class MainActivity extends AppCompatActivity {
         mRetrieveListeningDialog = builder.create();
     }
 
-    //lets users know that they need permission with using the audio recording
+    //Check for permissions
     private void requestPermissions() {
-        //if the user allows access
+        //if the user already allowed permission
         if(ContextCompat.checkSelfPermission(this,
                 android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
             setup();
         }
-        //if user does not... why they no trust :(
+        //if user did not... why they no trust :(
         else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                //show the user why you need their permission to record their voice.
+                //Check if the user did not block you from asking permission.
                 if(shouldShowRequestPermissionRationale(android.Manifest.permission.RECORD_AUDIO)) {
                     Toast.makeText(this,
                             "Audio Recorder permission required to retrieve and store audio.", Toast.LENGTH_SHORT).show();
                 }
             }
-
-            //requests permission from Manifest.
+            //requests permission
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[] {android.Manifest.permission.RECORD_AUDIO},
                         REQUEST_AUDIO_RECORD_RESULT);
@@ -137,21 +136,22 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //permission handler
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        //if the request is from the voice recording, need if you have multiple.
         if(requestCode == REQUEST_AUDIO_RECORD_RESULT) {
+            //You're granted yahhhh!!!
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 setup();
             }
 
+            //They denied you LOL
             else {
                 Toast.makeText(this,
                         "Audio Recording permission has not been granted, cannot understand voice.",
                         Toast.LENGTH_SHORT).show();
             }
-        }
-        else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
