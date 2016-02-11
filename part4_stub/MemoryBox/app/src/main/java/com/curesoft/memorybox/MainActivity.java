@@ -55,39 +55,23 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mAddMemoryButton = (AppCompatButton) findViewById(R.id.btn_add);
-        mRetrieveMemoryButton= (AppCompatButton) findViewById(R.id.btn_retrieve);
+        //Make buttons reference to buttons created in layout
 
+        //Speech init stuff
         mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
                 this.getPackageName());
-
-
         SpeechRecognitionListener listener = new SpeechRecognitionListener();
         mSpeechRecognizer.setRecognitionListener(listener);
 
         //set what happens when you click the "add memory" button
-        mAddMemoryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mAddListeningDialog.show();
-                mListening = ListeningType.AddMemory;
-                mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
-            }
-        });
+
 
         //set what happens when you click the "retrieve memory" button
-        mRetrieveMemoryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mRetrieveListeningDialog.show();
-                mListening = ListeningType.RetrieveMemory;
-                mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
-            }
-        });
+
 
         //Make sure to ask the user for permission (recording their voice);
         requestPermissions();
@@ -101,15 +85,9 @@ public class MainActivity extends AppCompatActivity {
 
         //Create dialog that will come up when the user hits the add memory button.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Speak the memory you want to SAVE")
-                .setTitle("Listening...");
-        mAddListeningDialog = builder.create();
 
         //Create dialog that will come up when the user hits the retrieve memory button.
         builder = new AlertDialog.Builder(this);
-        builder.setMessage("Speak the memory you want to RETRIEVE")
-                .setTitle("Listening...");
-        mRetrieveListeningDialog = builder.create();
     }
 
     //lets users know that they need permission with using the audio recording
@@ -137,13 +115,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //callback from the result from requesting permissions.
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if(requestCode == REQUEST_AUDIO_RECORD_RESULT) {
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 setup();
             }
-
             else {
                 Toast.makeText(this,
                         "Audio Recording permission has not been granted, cannot understand voice.",
@@ -238,30 +216,19 @@ public class MainActivity extends AppCompatActivity {
         {
             //Log.d(TAG, "onResults"); //$NON-NLS-1$
             ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-            int i = 0;
             // matches are the return values of speech recognition engine
             // Use these values for whatever you wish to do
 
             switch(mListening){
                 case AddMemory:
-                    if(mAddListeningDialog != null){
-                        mAddListeningDialog.dismiss();
-                        if(matches.size() != 0) {
-                            addMemory(matches.get(0));
-                        }else{
-                            Toast.makeText(MainActivity.this, "We didn't catch what you said", Toast.LENGTH_LONG).show();
-                        }
-                    }
+
+                    //ADD CODE HERE
+
                     break;
                 case RetrieveMemory:
-                    if(mRetrieveListeningDialog != null){
-                        mRetrieveListeningDialog.dismiss();
-                    }
-                    if(matches.size() != 0) {
-                        retrieveMemory(matches.get(0));
-                    }else{
-                        Toast.makeText(MainActivity.this, "We didn't catch what you said", Toast.LENGTH_LONG).show();
-                    }
+
+                    //ADD CODE HERE
+
                     break;
             }
         }
@@ -273,85 +240,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void addMemory(final String spoken){
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setMessage("You said: " + spoken)
-                .setTitle("Save?")
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        try {
-                            dbHandler.insertData(spoken);
-                            Toast.makeText(MainActivity.this, "Added memory!", Toast.LENGTH_LONG).show();
-                        } catch (SQLException e) {
-                            Log.e(TAG, "Could not add memory");
-                        }
-                        dialog.dismiss();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-        AlertDialog results = builder.create();
-        results.show();
+        //ADD CODE HERE...
     }
 
     public void retrieveMemory(final String spoken){
-        String[] split = spoken.split(" ");
-        ArrayList<String> goodWords = new ArrayList<>();
-
-        //Adds key words to array while ignoring the common words.
-        for (String word : split) {
-            if (!ignoreWords.contains(word)) {
-                goodWords.add(word);
-            }
-        }
-        Toast.makeText(MainActivity.this, "Retrieved memory!", Toast.LENGTH_LONG).show();
-
-        Cursor cur = dbHandler.getData(goodWords);
-        String searchResults = "";
-
-        //no match was found.
-        if(cur.getCount() == 0) {
-            //Log.d(TAG, "Did not get a hit on search.");
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setMessage("For phrase: " + spoken)
-                    .setTitle("No memory found")
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            AlertDialog results = builder.create();
-            results.show();
-        } else {
-            //Log.d(TAG, "got a hit on search, will start to parse.");
-            //organize the string for user to read.
-            int counter = 1;
-
-            //Go through the search results
-            while(cur.moveToNext()) {
-                searchResults += (counter) + ". " + cur.getString(0) + "\n";
-                counter++;
-            }
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setMessage(searchResults)
-                    .setTitle("We found your memory")
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            AlertDialog results = builder.create();
-            results.show();
-        }
+        //ADD CODE HERE...
     }
 
+    //words we do not care about, add more to make better :)
     List<String> ignoreWords = Arrays.asList(new String[]{"a", "i", "it", "am", "at", "on", "in", "to", "too", "very",
             "of", "from", "here", "even", "the", "but", "and", "is", "my",
             "them", "then", "this", "that", "than", "though", "so", "are"});
