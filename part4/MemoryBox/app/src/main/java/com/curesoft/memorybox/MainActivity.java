@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseHelper dbHandler;
 
     @Override
+    //Things done on initial boot of the application
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         SpeechRecognitionListener listener = new SpeechRecognitionListener();
         mSpeechRecognizer.setRecognitionListener(listener);
 
+        //set what happens when you click the "add memory" button
         mAddMemoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //set what happens when you click the "retrieve memory" button
         mRetrieveMemoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,8 +100,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //setup();
-        callVoice();
+        //Make sure to ask the user for permission (recording their voice);
+        requestPermissions();
     }
 
 
@@ -107,31 +110,37 @@ public class MainActivity extends AppCompatActivity {
         //Database portion of the application
         dbHandler = new DatabaseHelper(this);
 
+        //Create dialog that will come up when the user hits the add memory button.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Speak the memory you want to SAVE")
                 .setTitle("Listening...");
         mAddListeningDialog = builder.create();
 
+        //Create dialog that will come up when the user hits the retrieve memory button.
         builder = new AlertDialog.Builder(this);
         builder.setMessage("Speak the memory you want to RETRIEVE")
                 .setTitle("Listening...");
         mRetrieveListeningDialog = builder.create();
     }
 
-    private void callVoice() {
+    //lets users know that they need permission with using the audio recording
+    private void requestPermissions() {
+        //if the user allows access
         if(ContextCompat.checkSelfPermission(this,
                 android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
             setup();
         }
-
+        //if user does not... why they no trust :(
         else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                //show the user why you need their permission to record their voice.
                 if(shouldShowRequestPermissionRationale(android.Manifest.permission.RECORD_AUDIO)) {
                     Toast.makeText(this,
                             "Audio Recorder permission required to retrieve and store audio.", Toast.LENGTH_SHORT).show();
                 }
             }
 
+            //requests permission from Manifest.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[] {android.Manifest.permission.RECORD_AUDIO},
                         REQUEST_AUDIO_RECORD_RESULT);
@@ -189,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    //class involved with speech recognition.
     protected class SpeechRecognitionListener implements RecognitionListener
     {
 
@@ -214,7 +224,6 @@ public class MainActivity extends AppCompatActivity {
         public void onError(int error)
         {
             mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
-
             //Log.d(TAG, "error = " + error);
         }
 
@@ -282,24 +291,13 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String[] split = spoken.split(" ");
-                        ArrayList<String> goodWords = new ArrayList<>();
-
-                        //Adds key words to array while ignoring the common words.
-                        for (String word : split) {
-                            if (!ignoreWords.contains(word)) {
-                                goodWords.add(word);
-                            }
-                        }
-
                         try {
-                            dbHandler.insertData(spoken, goodWords);
+                            dbHandler.insertData(spoken);
                             Toast.makeText(MainActivity.this, "Added memory!", Toast.LENGTH_LONG).show();
                         } catch (SQLException e) {
                             Log.e(TAG, "Could not add memory");
                         }
                         dialog.dismiss();
-
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -314,10 +312,19 @@ public class MainActivity extends AppCompatActivity {
 
     public void retrieveMemory(final String spoken){
         String[] split = spoken.split(" ");
+        ArrayList<String> goodWords = new ArrayList<>();
+
+        //Adds key words to array while ignoring the common words.
+        for (String word : split) {
+            if (!ignoreWords.contains(word)) {
+                goodWords.add(word);
+            }
+        }
         Toast.makeText(MainActivity.this, "Retrieved memory!", Toast.LENGTH_LONG).show();
 
-        Cursor cur = dbHandler.getData(split);
+        Cursor cur = dbHandler.getData(goodWords);
         String searchResults = "";
+
         //no match was found.
         if(cur.getCount() == 0) {
             //Log.d(TAG, "Did not get a hit on search.");
@@ -334,8 +341,11 @@ public class MainActivity extends AppCompatActivity {
             results.show();
         } else {
             //Log.d(TAG, "got a hit on search, will start to parse.");
+
             //organize the string for user to read.
             int counter = 1;
+
+            //Go through the search results
             while(cur.moveToNext()) {
                 searchResults += (counter) + ". " + cur.getString(0) + "\n";
                 counter++;

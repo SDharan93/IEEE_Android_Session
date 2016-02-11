@@ -54,7 +54,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         onCreate(db);
     }
 
-    public void insertData (String phrase, ArrayList<String> keywords) {
+    public void insertData (String phrase) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         //get the current time
@@ -73,7 +73,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         }
     }
 
-    public Cursor getData(String[] keywords) {
+    public Cursor getData(ArrayList<String> keywords) {
         SQLiteDatabase db = this.getWritableDatabase();
         //String used for search query with all the keywords.
         String search = "";
