@@ -23,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
     private Button mListenButton;
     private TextView mStatusText;
 
+    private static final int REQUEST_AUDIO_RECORD_RESULT = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,23 +33,6 @@ public class MainActivity extends AppCompatActivity {
         mListenButton = (Button) findViewById(R.id.button);
         mStatusText = (TextView) findViewById(R.id.textView);
 
-        mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-        mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
-                this.getPackageName());
-
-        SpeechRecognitionListener listener = new SpeechRecognitionListener();
-        mSpeechRecognizer.setRecognitionListener(listener);
-
-        mListenButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mStatusText.setText("Status: Listening...");
-                mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
-            }
-        });
         callVoice();
 
     }
@@ -72,9 +57,44 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[] {android.Manifest.permission.RECORD_AUDIO}, 1);
+                requestPermissions(new String[] {android.Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO_RECORD_RESULT);
             }
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if(requestCode == REQUEST_AUDIO_RECORD_RESULT) {
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                setup();
+            }
+
+            else {
+                Toast.makeText(this,
+                        "Audio Recording permission has not been granted, cannot understand voice.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    public void setup() {
+        mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
+                this.getPackageName());
+
+        SpeechRecognitionListener listener = new SpeechRecognitionListener();
+        mSpeechRecognizer.setRecognitionListener(listener);
+
+        mListenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mStatusText.setText("Status: Listening...");
+                mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
+            }
+        });
     }
 
     protected class SpeechRecognitionListener implements RecognitionListener
