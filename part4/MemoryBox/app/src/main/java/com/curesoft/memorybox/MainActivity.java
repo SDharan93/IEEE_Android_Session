@@ -90,7 +90,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Make sure to ask the user for permission (recording their voice);
-        requestPermissions();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions();
+        } else {
+            setup();
+        }
     }
 
 
